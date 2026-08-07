@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kruger.ai</title>
+  <meta name="description"
+    content="Kruger.ai transforms your ideas into professional social media content for every platform using the power of AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="Favicon.png?v=2" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════ PAGE LOADER ═══════════════════════════ -->
+  <div id="page-loader" class="page-loader" aria-hidden="true">
+    <div class="loader-inner">
+      <div class="loader-mark-wrap">
+        <svg class="loader-mark-svg" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="58" height="58" rx="12" stroke="white" stroke-width="1.5" class="loader-rect" />
+          <path d="M18 18L30 30L18 42" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="loader-k1" />
+          <path d="M30 30L42 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="loader-k2" />
+        </svg>
+      </div>
+      <div class="loader-wordmark">
+        <span class="loader-char" style="--i:0">K</span>
+        <span class="loader-char" style="--i:1">R</span>
+        <span class="loader-char" style="--i:2">U</span>
+        <span class="loader-char" style="--i:3">G</span>
+        <span class="loader-char" style="--i:4">E</span>
+        <span class="loader-char" style="--i:5">R</span>
+        <span class="loader-dot" style="--i:6">.</span>
+        <span class="loader-char loader-ai" style="--i:7">AI</span>
+      </div>
+      <div class="loader-bar-track">
+        <div class="loader-bar-fill" id="loader-bar"></div>
+      </div>
+      <p class="loader-status" id="loader-status">Initialising engine...</p>
+    </div>
+    <div class="loader-lines" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="main-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" id="nav-logo-link" aria-label="Kruger.ai home">
+        <span class="logo-mark"></span>
+        <span class="logo-text">Kruger.ai</span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#" id="nav-features">Features</a></li>
+        <li><a href="#templates" id="nav-templates">Templates</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="#" id="nav-signin" class="nav-link-btn">Sign In</a>
+        <button type="button" id="nav-login" class="nav-link-btn">Login</button>
+      </div>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section id="hero" class="hero-search-centric">
+    <!-- Subtle Floating Social Media Logos -->
+    <div class="floating-logo logo-ig" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.5" />
+        <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+      </svg>
+    </div>
+    <div class="floating-logo logo-li" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5" />
+        <path d="M7 10v7M7 7v.5M11 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4M11 10v7" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" />
+      </svg>
+    </div>
+    <div class="floating-logo logo-yt" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" stroke-width="1.5" />
+        <path d="M10 9l5 3-5 3V9z" fill="currentColor" />
+      </svg>
+    </div>
+    <div class="floating-logo logo-x" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 4l16 16m0-16L4 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </div>
+    <div class="floating-logo logo-fb" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z" stroke="currentColor"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+    <div class="floating-logo logo-tk" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M9 12a4 4 0 104 4V4a5 5 0 005 5v3a8 8 0 01-5-1.5v5.5z" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+
+    <div class="hero-content-center">
+      <h1 class="hero-headline" id="main-headline">What do you want to<br /><span class="text-gradient">create
+          today?</span></h1>
+      <p class="hero-sub" id="main-subline">One prompt generates your entire social media campaign instantly.</p>
+
+      <!-- Big ChatGPT style prompt input -->
+      <div class="hero-prompt-container" id="prompt-input-container">
+        <div class="hero-prompt-box">
+          <div class="prompt-tools">
+            <button type="button" class="tool-btn" id="emoji-btn" aria-label="Insert Emoji" title="Insert Emoji">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                  stroke="currentColor" stroke-width="1.5" />
+                <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14M9 9H9.01M15 9H15.01" stroke="currentColor"
+                  stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" id="attach-btn" aria-label="Attach Reference"
+              title="Attach Reference">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 2.12 2.12L17.12 9.12a3 3 0 0 0-4.24-4.24l-6.5 6.5a4.5 4.5 0 0 0 6.36 6.36l6.5-6.5"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button type="button" class="tool-btn" id="template-btn" aria-label="Select Template"
+              title="Select Template">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" stroke="currentColor"
+                  stroke-width="1.5" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <div class="prompt-input-wrapper">
+            <div class="attachments-area" id="attachments-area"></div>
+            <input type="text" id="user-prompt-input" class="hero-prompt-input"
+              placeholder="e.g. Create a launch campaign for my coffee shop..." autocomplete="off" />
+          </div>
+          <button id="generate-btn" class="hero-prompt-btn" aria-label="Generate">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Emoji Popover -->
+        <div class="emoji-popover" id="emoji-popover">
+          <button type="button" class="emoji-item">✨</button>
+          <button type="button" class="emoji-item">🚀</button>
+          <button type="button" class="emoji-item">🔥</button>
+          <button type="button" class="emoji-item">☕</button>
+          <button type="button" class="emoji-item">💼</button>
+          <button type="button" class="emoji-item">📈</button>
+          <button type="button" class="emoji-item">🎨</button>
+          <button type="button" class="emoji-item">💻</button>
+        </div>
+
+        <!-- Templates Popover -->
+        <div class="templates-popover" id="templates-popover">
+          <button type="button" class="template-item"
+            data-prompt="Create a high-energy product launch for a sports drink...">Product Launch</button>
+          <button type="button" class="template-item"
+            data-prompt="Design an elegant real estate open house campaign...">Real Estate</button>
+          <button type="button" class="template-item"
+            data-prompt="Generate a minimalist fashion lookbook post...">Fashion Lookbook</button>
+          <button type="button" class="template-item"
+            data-prompt="Create a tech startup announcement for a new AI feature...">Tech Startup</button>
+        </div>
+
+        <input type="file" id="reference-file-input" style="display: none;" multiple />
+
+        <div class="terminal-processing" id="terminal-processing" aria-live="polite">
+          <div class="processing-bar">
+            <div class="processing-fill" id="processing-fill"></div>
+          </div>
+          <span class="processing-label" id="processing-label">Waiting for prompt...</span>
+        </div>
+      </div>
+
+      <!-- Generated output frame (hidden by default) -->
+      <div class="output-grid single-frame-container" id="output-grid" aria-label="Generated content output">
+        <div class="output-card single-output-card" id="single-output-card">
+          <div class="output-card-inner single-frame-inner">
+            <div class="single-frame-header">
+              <div class="single-frame-header-left">
+                <div class="output-platform-icon single-frame-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="4" />
+                    <circle cx="8.5" cy="8.5" r="1.5" fill="white" />
+                    <path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="single-frame-title" id="single-frame-title">Generated Photo</h3>
+                  <p class="single-frame-subtitle" id="single-frame-subtitle">AI visual output</p>
+                </div>
+              </div>
+              <span class="output-badge single-frame-badge" id="single-frame-badge">AI Rendered</span>
+            </div>
+
+            <div class="single-frame-display" id="single-frame-display">
+              <div class="single-frame-placeholder" id="single-frame-placeholder">
+                <div class="placeholder-icon">🎨</div>
+                <p>Your AI photo result will appear here</p>
+              </div>
+              <img id="single-frame-img" class="single-frame-img" src="" alt="Generated AI Photo"
+                style="display:none;" />
+            </div>
+
+            <div class="single-frame-footer">
+              <span class="single-frame-prompt" id="single-frame-prompt"></span>
+              <button type="button" id="single-frame-download-btn" class="single-frame-btn" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                Download Photo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ FEATURES ═══════════════════════════ -->
+  <section id="features" class="section-features" aria-label="Features">
+    <div class="section-label">Capabilities</div>
+    <h2 class="section-title">Everything you need<br /><em>to dominate every platform.</em></h2>
+    <p class="section-sub">Six intelligent modules that work together to turn a single idea into a complete campaign
+      infrastructure.</p>
+
+    <div class="features-grid" id="features-grid">
+
+      <article class="feature-block" id="feat-generation" data-index="0">
+        <div class="feature-block-inner">
+          <div class="feature-number" aria-hidden="true">01</div>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M24 4L28 18H42L31 26L35 40L24 32L13 40L17 26L6 18H20L24 4Z" stroke="white" stroke-width="1.5"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="feature-title">AI Content Generation</h3>
+          <p class="feature-desc">From a single sentence, Kruger.ai crafts platform-native content: posts, captions,
+            carousels, banners, and scripts — all with your brand voice baked in.</p>
+        </div>
+      </article>
+
+      <article class="feature-block" id="feat-scheduling" data-index="1">
+        <div class="feature-block-inner">
+          <div class="feature-number" aria-hidden="true">02</div>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="18" stroke="white" stroke-width="1.5" />
+              <path d="M24 12v12l8 8" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Social Scheduling</h3>
+          <p class="feature-desc">Intelligent scheduling that learns when your audience is most active. Set it once, let
+            Kruger.ai optimize delivery across all your channels automatically.</p>
+        </div>
+      </article>
+
+      <article class="feature-block" id="feat-brand" data-index="2">
+        <div class="feature-block-inner">
+          <div class="feature-number" aria-hidden="true">03</div>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <rect x="8" y="8" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+              <rect x="26" y="8" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+              <rect x="8" y="26" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+              <rect x="26" y="26" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Brand Kit</h3>
+          <p class="feature-desc">Upload your fonts, colors, logos, and tone guidelines. Every piece of content
+            generated will feel unmistakably yours — consistent across every platform.</p>
+        </div>
+      </article>
+
+      <article class="feature-block" id="feat-campaign" data-index="3">
+        <div class="feature-block-inner">
+          <div class="feature-number" aria-hidden="true">04</div>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M8 40L20 20L28 32L34 24L40 40H8Z" stroke="white" stroke-width="1.5" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Campaign Builder</h3>
+          <p class="feature-desc">Build entire multi-week campaigns from a single brief. Kruger.ai maps the content
+            calendar, assigns assets, and ensures narrative cohesion across posts.</p>
+        </div>
+      </article>
+
+      <article class="feature-block" id="feat-analytics" data-index="4">
+        <div class="feature-block-inner">
+          <div class="feature-number" aria-hidden="true">05</div>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <rect x="6" y="28" width="8" height="14" rx="1" stroke="white" stroke-width="1.5" />
+              <rect x="20" y="18" width="8" height="24" rx="1" stroke="white" stroke-width="1.5" />
+              <rect x="34" y="8" width="8" height="34" rx="1" stroke="white" stroke-width="1.5" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Analytics</h3>
+          <p class="feature-desc">Real-time performance intelligence. See what's working, what's resonating, and which
+            creative variants are driving the most engagement — per platform.</p>
+        </div>
+      </article>
+
+      <article class="feature-block" id="feat-team" data-index="5">
+        <div class="feature-block-inner">
+          <div class="feature-number" aria-hidden="true">06</div>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <circle cx="18" cy="18" r="7" stroke="white" stroke-width="1.5" />
+              <circle cx="32" cy="22" r="5" stroke="white" stroke-width="1.5" />
+              <path d="M4 40c0-7.7 6.3-14 14-14s14 6.3 14 14" stroke="white" stroke-width="1.5"
+                stroke-linecap="round" />
+              <path d="M32 32c4.4 0 8 3.6 8 8" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3 class="feature-title">Team Collaboration</h3>
+          <p class="feature-desc">Invite your creative team, set approval workflows, leave feedback directly on assets,
+            and ship campaigns faster with coordinated AI-assisted production.</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ SOCIAL PROOF ═══════════════════════════ -->
+  <section id="proof" class="section-proof" aria-label="Social proof and testimonials">
+    <div class="proof-marquee-wrapper" aria-label="Client logos">
+      <div class="proof-marquee" id="proof-marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span class="marquee-logo">Notion</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Stripe</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Linear</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Vercel</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Figma</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Loom</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <!-- duplicate for loop -->
+          <span class="marquee-logo">Notion</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Stripe</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Linear</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Vercel</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Figma</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+          <span class="marquee-logo">Loom</span>
+          <span class="marquee-sep" aria-hidden="true">·</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ TEMPLATES ═══════════════════════════ -->
+  <section id="templates" class="section-templates" aria-label="Our Templates">
+    <div class="templates-content">
+      <div class="section-label">Pre-Made Prompts</div>
+      <h2 class="cta-headline">Our Templates</h2>
+      <p class="cta-sub">Select a template below to instantly load it and start editing, or choose one from the search
+        bar.</p>
+
+      <div class="templates-grid">
+        <!-- 10 template items -->
+        <div class="template-card" data-prompt="Create a high-energy product launch for a sports drink...">
+          <div class="template-img template-grad-1"></div>
+          <div class="template-info">
+            <h4>Product Launch</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Design an elegant real estate open house campaign...">
+          <div class="template-img template-grad-2"></div>
+          <div class="template-info">
+            <h4>Real Estate</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Generate a minimalist fashion lookbook post...">
+          <div class="template-img template-grad-3"></div>
+          <div class="template-info">
+            <h4>Fashion Lookbook</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Create a tech startup announcement for a new AI feature...">
+          <div class="template-img template-grad-4"></div>
+          <div class="template-info">
+            <h4>Tech Startup</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Design a mouth-watering restaurant menu highlight...">
+          <div class="template-img template-grad-5"></div>
+          <div class="template-info">
+            <h4>Restaurant Menu</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Create a cozy winter travel destination ad...">
+          <div class="template-img template-grad-6"></div>
+          <div class="template-info">
+            <h4>Winter Travel</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Design a motivational fitness challenge social graphic...">
+          <div class="template-img template-grad-7"></div>
+          <div class="template-info">
+            <h4>Fitness Challenge</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Create a professional B2B software webinar invitation...">
+          <div class="template-img template-grad-1"></div>
+          <div class="template-info">
+            <h4>B2B Webinar</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Generate an aesthetic skincare routine tutorial graphic...">
+          <div class="template-img template-grad-2"></div>
+          <div class="template-info">
+            <h4>Skincare Routine</h4>
+          </div>
+        </div>
+        <div class="template-card" data-prompt="Design a vibrant summer music festival lineup poster...">
+          <div class="template-img template-grad-3"></div>
+          <div class="template-info">
+            <h4>Music Festival</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+  <footer id="main-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo" id="footer-logo" aria-label="Kruger.ai">
+          <span class="logo-mark"></span>
+          <span class="logo-text">Kruger.ai</span>
+        </a>
+        <p class="footer-tagline">AI-powered social media content generation. One prompt, every platform.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title">Product</div>
+          <a href="#" id="foot-features">Features</a>
+          <a href="#" id="foot-changelog">Changelog</a>
+          <a href="#" id="foot-roadmap">Roadmap</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Company</div>
+          <a href="#" id="foot-about">About</a>
+          <a href="#" id="foot-blog">Blog</a>
+          <a href="#" id="foot-careers">Careers</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Legal</div>
+          <a href="#" id="foot-privacy">Privacy</a>
+          <a href="#" id="foot-terms">Terms</a>
+          <a href="#" id="foot-security">Security</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Kruger.ai. All rights reserved.</span>
+      <span>Built with intelligence.</span>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════ SIGN IN MODAL ═══════════════════════════ -->
+  <div class="modal-overlay" id="signin-modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+
+      <div class="modal-header">
+        <div class="modal-logo-wrapper">
+          <span class="logo-mark"></span>
+          <span class="logo-text">Kruger.ai</span>
+        </div>
+        <h2 id="modal-title">Create an account</h2>
+        <p>Sign in to create your campaign workspace</p>
+      </div>
+
+      <!-- Social Logins (Google only) -->
+      <div class="social-logins">
+        <button type="button" class="btn-social btn-google-full"
+          style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.531,6.49,2.531,12s4.49,10,10.014,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
+          </svg>
+          Sign in with Google
+        </button>
+      </div>
+
+      <div class="modal-divider"><span>or sign in with email</span></div>
+
+      <form id="signin-form" class="modal-form">
+        <div class="form-group">
+          <label for="signin-name">Your Name</label>
+          <input type="text" id="signin-name" required placeholder="e.g. Alex" />
+        </div>
+        <div class="form-group">
+          <label for="signin-email">Email Address</label>
+          <input type="email" id="signin-email" required placeholder="name@company.com" />
+        </div>
+        <div class="form-group password-group">
+          <label for="signin-password">Password</label>
+          <input type="password" id="signin-password" placeholder="********" />
+        </div>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" checked />
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-pass">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 8px;">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ LOG IN MODAL ═══════════════════════════ -->
+  <div class="modal-overlay" id="login-modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-labelledby="login-modal-title">
+      <button class="modal-close" id="login-modal-close" aria-label="Close modal">✕</button>
+
+      <div class="modal-header">
+        <div class="modal-logo-wrapper">
+          <span class="logo-mark"></span>
+          <span class="logo-text">Kruger.ai</span>
+        </div>
+        <h2 id="login-modal-title">Welcome back</h2>
+        <p>Log in to access your campaign workspace</p>
+      </div>
+
+      <!-- Social Logins (Google only) -->
+      <div class="social-logins">
+        <button type="button" class="btn-social btn-google-full"
+          style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.531,6.49,2.531,12s4.49,10,10.014,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
+          </svg>
+          Log in with Google
+        </button>
+      </div>
+
+      <div class="modal-divider"><span>or log in with email</span></div>
+
+      <form id="login-form" class="modal-form">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" required placeholder="name@company.com" />
+        </div>
+        <div class="form-group password-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="********" required />
+        </div>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" checked />
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-pass">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 8px;">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ SIDE PANEL ═══════════════════════════ -->
+  <div class="side-panel-overlay" id="side-panel-overlay" aria-hidden="true"></div>
+  <div class="side-panel" id="side-panel" aria-hidden="true">
+    <div class="side-panel-header">
+      <h3 id="sp-title">Asset Details</h3>
+      <button class="sp-close-btn" id="sp-close" aria-label="Close panel">&times;</button>
+    </div>
+    <div class="side-panel-content">
+      <div class="sp-preview-container">
+        <div id="sp-preview" class="sp-preview"></div>
+      </div>
+      <div class="sp-details">
+        <h4 id="sp-name">Generated Poster</h4>
+        <p id="sp-desc">Platform: Social Media</p>
+      </div>
+      <div class="sp-actions">
+        <button id="sp-download-btn" class="btn btn-primary btn-full"
+          style="padding: 14px; border-radius: 8px;">Download Asset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ TEMPLATE DETAIL MODAL ═══════════════════════════ -->
+  <div class="tpl-modal-overlay" id="tpl-modal-overlay" aria-hidden="true"></div>
+  <div class="tpl-modal" id="tpl-modal" role="dialog" aria-labelledby="tpl-modal-title" aria-hidden="true">
+    <button class="tpl-modal-close" id="tpl-modal-close" aria-label="Close">&times;</button>
+    <div class="tpl-modal-left">
+      <div class="tpl-preview-thumb" id="tpl-thumb"></div>
+      <div class="tpl-tags">
+        <span class="tpl-tag" id="tpl-category">Campaign</span>
+        <span class="tpl-tag" id="tpl-platforms">Multi-Platform</span>
+      </div>
+    </div>
+    <div class="tpl-modal-right">
+      <p class="tpl-label">Template</p>
+      <h2 id="tpl-modal-title">Product Launch</h2>
+      <p class="tpl-desc" id="tpl-modal-desc">A high-energy, conversion-focused campaign template designed to make your
+        product launch unforgettable across every platform.</p>
+      <div class="tpl-prompt-preview">
+        <p class="tpl-prompt-label">Prompt Preview</p>
+        <div class="tpl-prompt-text" id="tpl-prompt-text"></div>
+      </div>
+      <div class="tpl-modal-actions">
+        <button id="tpl-use-btn" class="btn btn-primary"
+          style="padding: 14px 32px; font-size: 16px; border-radius: 10px; font-weight: 700;">Use This Template</button>
+        <p class="tpl-hint">You can edit the prompt after loading it.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ FEATURE BOOK MODAL ═══════════════════════════ -->
+  <div class="book-overlay" id="book-overlay"></div>
+  <div class="book-modal" id="book-modal" role="dialog" aria-modal="true" aria-hidden="true">
+
+    <button class="book-close" id="book-close" aria-label="Close book modal">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <!-- Book Container -->
+    <div class="book-scene">
+      <div class="book-container" id="book-container">
+
+        <!-- Fixed Left Base (Inside Back Cover) -->
+        <div class="bk-base-left">
+          <div class="bk-base-content">
+            <div class="bk-brand-header">
+              <span class="logo-mark"></span>
+              <span class="logo-text">Kruger.ai</span>
+            </div>
+            <p class="bk-tag">Feature Ecosystem</p>
+            <div class="bk-summary-list">
+              <div class="bk-sum-item" data-jump="0"><span>01</span> AI Content Generation</div>
+              <div class="bk-sum-item" data-jump="1"><span>02</span> Social Scheduling</div>
+              <div class="bk-sum-item" data-jump="2"><span>03</span> Brand Kit</div>
+              <div class="bk-sum-item" data-jump="3"><span>04</span> Campaign Builder</div>
+              <div class="bk-sum-item" data-jump="4"><span>05</span> Analytics</div>
+              <div class="bk-sum-item" data-jump="5"><span>06</span> Team Collaboration</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Right Base (Underneath last leaf) -->
+        <div class="bk-base-right">
+          <div class="bk-base-end">
+            <h3>End of Features</h3>
+            <p>Ready to transform your social media workflow?</p>
+            <button class="btn btn-primary" id="bk-get-started" style="padding: 12px 24px; border-radius: 8px;">Get
+              Started</button>
+          </div>
+        </div>
+
+        <!-- FLIPPING LEAVES STACK -->
+
+        <!-- LEAF 0: FRONT COVER -->
+        <div class="bk-leaf" id="leaf-cover" style="z-index: 20;">
+          <div class="bk-face bk-front bk-cover-front">
+            <div class="bk-cover-badge">CAPABILITIES</div>
+            <div class="bk-cover-logo">
+              <span class="logo-mark"></span>
+              <span class="logo-text">Kruger.ai</span>
+            </div>
+            <h2 class="bk-cover-title">Feature Guide</h2>
+            <p class="bk-cover-sub">Explore the 6 core AI engines powering your growth.</p>
+            <div class="bk-cover-action">
+              <span class="bk-flip-hint">Click cover to open &rarr;</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back bk-cover-back">
+            <div class="bk-inside-welcome">
+              <span class="bk-chapter">WELCOME</span>
+              <h3>Intelligent Automation</h3>
+              <p>Turn a single prompt into platform-native campaigns across every channel.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEAF 1: Feature 01 - AI Content Generation -->
+        <div class="bk-leaf" id="leaf-0" style="z-index: 19;">
+          <div class="bk-face bk-front">
+            <div class="bk-page-header">
+              <span class="bk-num">01 / 06</span>
+              <span class="bk-cat">CONTENT ENGINE</span>
+            </div>
+            <div class="bk-icon-wrap">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path d="M24 4L28 18H42L31 26L35 40L24 32L13 40L17 26L6 18H20L24 4Z" stroke="white" stroke-width="1.5"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h2 class="bk-feature-title">AI Content Generation</h2>
+            <p class="bk-feature-desc">From a single sentence, Kruger.ai crafts platform-native content: posts,
+              captions, carousels, banners, and scripts — all with your brand voice baked in.</p>
+            <div class="bk-pill-group">
+              <span>Posts</span><span>Captions</span><span>Carousels</span><span>Banners</span><span>Scripts</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back">
+            <div class="bk-inside-detail">
+              <h4>Feature Highlights</h4>
+              <ul>
+                <li>Multi-platform variant generation in under 5 seconds</li>
+                <li>Custom brand voice adaptation</li>
+                <li>Native formatting for IG, LinkedIn, YT, FB</li>
+              </ul>
+              <div class="bk-quote-box">"One prompt creates your entire campaign asset suite."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEAF 2: Feature 02 - Social Scheduling -->
+        <div class="bk-leaf" id="leaf-1" style="z-index: 18;">
+          <div class="bk-face bk-front">
+            <div class="bk-page-header">
+              <span class="bk-num">02 / 06</span>
+              <span class="bk-cat">AUTOMATION</span>
+            </div>
+            <div class="bk-icon-wrap">
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="18" stroke="white" stroke-width="1.5" />
+                <path d="M24 12v12l8 8" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <h2 class="bk-feature-title">Social Scheduling</h2>
+            <p class="bk-feature-desc">Intelligent scheduling that learns when your audience is most active. Set it
+              once, let Kruger.ai optimize delivery across all your channels automatically.</p>
+            <div class="bk-pill-group">
+              <span>Smart Timing</span><span>Auto-Publish</span><span>Cross-Channel</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back">
+            <div class="bk-inside-detail">
+              <h4>Feature Highlights</h4>
+              <ul>
+                <li>AI heatmap active hour detection per platform</li>
+                <li>Automated queue recycling & optimization</li>
+                <li>Multi-timezone scheduling engine</li>
+              </ul>
+              <div class="bk-quote-box">"Publish at peak engagement without lifting a finger."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEAF 3: Feature 03 - Brand Kit -->
+        <div class="bk-leaf" id="leaf-2" style="z-index: 17;">
+          <div class="bk-face bk-front">
+            <div class="bk-page-header">
+              <span class="bk-num">03 / 06</span>
+              <span class="bk-cat">IDENTITY</span>
+            </div>
+            <div class="bk-icon-wrap">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect x="8" y="8" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+                <rect x="26" y="8" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+                <rect x="8" y="26" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+                <rect x="26" y="26" width="14" height="14" rx="2" stroke="white" stroke-width="1.5" />
+              </svg>
+            </div>
+            <h2 class="bk-feature-title">Brand Kit</h2>
+            <p class="bk-feature-desc">Upload your fonts, colors, logos, and tone guidelines. Every piece of content
+              generated will feel unmistakably yours — consistent across every platform.</p>
+            <div class="bk-pill-group">
+              <span>Color Palettes</span><span>Custom Fonts</span><span>Logo Placement</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back">
+            <div class="bk-inside-detail">
+              <h4>Feature Highlights</h4>
+              <ul>
+                <li>Automatic typography enforcement</li>
+                <li>HEX palette mapping across visual graphics</li>
+                <li>Tone-of-voice AI guardrails</li>
+              </ul>
+              <div class="bk-quote-box">"Flawless brand consistency across all channels."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEAF 4: Feature 04 - Campaign Builder -->
+        <div class="bk-leaf" id="leaf-3" style="z-index: 16;">
+          <div class="bk-face bk-front">
+            <div class="bk-page-header">
+              <span class="bk-num">04 / 06</span>
+              <span class="bk-cat">STRATEGY</span>
+            </div>
+            <div class="bk-icon-wrap">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path d="M8 40L20 20L28 32L34 24L40 40H8Z" stroke="white" stroke-width="1.5" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h2 class="bk-feature-title">Campaign Builder</h2>
+            <p class="bk-feature-desc">Build entire multi-week campaigns from a single brief. Kruger.ai maps the content
+              calendar, assigns assets, and ensures narrative cohesion across posts.</p>
+            <div class="bk-pill-group">
+              <span>Multi-Week Arc</span><span>Content Roadmap</span><span>Asset Mapping</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back">
+            <div class="bk-inside-detail">
+              <h4>Feature Highlights</h4>
+              <ul>
+                <li>End-to-end campaign brief parsing</li>
+                <li>Staggered narrative arc sequencing</li>
+                <li>Automated asset distribution matrix</li>
+              </ul>
+              <div class="bk-quote-box">"Scale from single post to full campaign roadmap instantly."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEAF 5: Feature 05 - Analytics -->
+        <div class="bk-leaf" id="leaf-4" style="z-index: 15;">
+          <div class="bk-face bk-front">
+            <div class="bk-page-header">
+              <span class="bk-num">05 / 06</span>
+              <span class="bk-cat">INTELLIGENCE</span>
+            </div>
+            <div class="bk-icon-wrap">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect x="6" y="28" width="8" height="14" rx="1" stroke="white" stroke-width="1.5" />
+                <rect x="20" y="18" width="8" height="24" rx="1" stroke="white" stroke-width="1.5" />
+                <rect x="34" y="8" width="8" height="34" rx="1" stroke="white" stroke-width="1.5" />
+              </svg>
+            </div>
+            <h2 class="bk-feature-title">Analytics</h2>
+            <p class="bk-feature-desc">Real-time performance intelligence. See what's working, what's resonating, and
+              which creative variants are driving the most engagement — per platform.</p>
+            <div class="bk-pill-group">
+              <span>Real-Time Stats</span><span>Variant A/B</span><span>Engagement AI</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back">
+            <div class="bk-inside-detail">
+              <h4>Feature Highlights</h4>
+              <ul>
+                <li>Platform-specific conversion attribution</li>
+                <li>Visual copy & headline resonance score</li>
+                <li>Automated performance recommendations</li>
+              </ul>
+              <div class="bk-quote-box">"Data-driven insights to iterate faster and win."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEAF 6: Feature 06 - Team Collaboration -->
+        <div class="bk-leaf" id="leaf-5" style="z-index: 14;">
+          <div class="bk-face bk-front">
+            <div class="bk-page-header">
+              <span class="bk-num">06 / 06</span>
+              <span class="bk-cat">COLLABORATION</span>
+            </div>
+            <div class="bk-icon-wrap">
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle cx="18" cy="18" r="7" stroke="white" stroke-width="1.5" />
+                <circle cx="32" cy="22" r="5" stroke="white" stroke-width="1.5" />
+                <path d="M4 40c0-7.7 6.3-14 14-14s14 6.3 14 14" stroke="white" stroke-width="1.5"
+                  stroke-linecap="round" />
+                <path d="M32 32c4.4 0 8 3.6 8 8" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <h2 class="bk-feature-title">Team Collaboration</h2>
+            <p class="bk-feature-desc">Invite your creative team, set approval workflows, leave feedback directly on
+              assets, and ship campaigns faster with coordinated AI-assisted production.</p>
+            <div class="bk-pill-group">
+              <span>Approval Chains</span><span>Live Comments</span><span>Role Access</span>
+            </div>
+          </div>
+          <div class="bk-face bk-back">
+            <div class="bk-inside-detail">
+              <h4>Feature Highlights</h4>
+              <ul>
+                <li>Granular permissions (Viewer, Creator, Approver)</li>
+                <li>Real-time asset feedback and inline notes</li>
+                <li>Speedy production handoffs</li>
+              </ul>
+              <div class="bk-quote-box">"Unify creators, strategists, and clients in one space."</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Navigation & Page Dots -->
+    <div class="bk-controls">
+      <button class="bk-nav-btn" id="bk-prev-btn" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+        <span>Previous</span>
+      </button>
+
+      <div class="bk-dots" id="bk-dots">
+        <button class="bk-dot active" data-step="-1" title="Cover"></button>
+        <button class="bk-dot" data-step="0" title="01. AI Content Generation"></button>
+        <button class="bk-dot" data-step="1" title="02. Social Scheduling"></button>
+        <button class="bk-dot" data-step="2" title="03. Brand Kit"></button>
+        <button class="bk-dot" data-step="3" title="04. Campaign Builder"></button>
+        <button class="bk-dot" data-step="4" title="05. Analytics"></button>
+        <button class="bk-dot" data-step="5" title="06. Team Collaboration"></button>
+      </div>
+
+      <button class="bk-nav-btn" id="bk-next-btn">
+        <span>Next</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="main.js"></script>
+</body>
+
+</html>
