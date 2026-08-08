@@ -289,6 +289,69 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     }
 
     console.log('[Kruger.ai] Decoded base64 image rendered to single frame.');
+
+    // Save image directly into MongoDB Atlas and display Public URL
+    saveImageToMongoDBAtlas(imageUrl, promptText);
+  }
+
+  async function saveImageToMongoDBAtlas(imageUrl, promptText) {
+    const dbBox = document.getElementById('db-public-url-box');
+    const urlInput = document.getElementById('public-url-input');
+    const statusLabel = document.getElementById('db-save-status');
+    const copyBtn = document.getElementById('copy-public-url-btn');
+
+    if (dbBox) {
+      dbBox.style.display = 'block';
+    }
+    if (statusLabel) {
+      statusLabel.textContent = 'Saving to MongoDB Atlas... ⏳';
+      statusLabel.style.color = '#fbbf24';
+    }
+    if (urlInput) {
+      urlInput.value = 'Connecting & saving image to Atlas...';
+    }
+
+    try {
+      const res = await fetch('/api/save-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageData: imageUrl,
+          prompt: promptText || 'Generated AI Photo',
+          title: promptText ? promptText.substring(0, 40) : 'Generated Content'
+        })
+      });
+
+      const resp = await res.json();
+      const itemData = resp.data || resp.image;
+      if (res.ok && itemData && itemData.publicUrl) {
+        if (urlInput) urlInput.value = itemData.publicUrl;
+        if (statusLabel) {
+          statusLabel.textContent = 'Stored in Atlas ✓';
+          statusLabel.style.color = '#34d399';
+        }
+
+        if (copyBtn) {
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(itemData.publicUrl);
+            const origText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✅ Copied!';
+            setTimeout(() => { copyBtn.innerHTML = origText; }, 2000);
+          };
+        }
+      } else {
+        if (statusLabel) {
+          statusLabel.textContent = 'Atlas Error';
+          statusLabel.style.color = '#f87171';
+        }
+      }
+    } catch (err) {
+      console.error('[MongoDB Atlas] Error saving image:', err);
+      if (statusLabel) {
+        statusLabel.textContent = 'Offline / Save Failed';
+        statusLabel.style.color = '#cbd5e1';
+      }
+    }
   }
 
   async function sendPromptToWebhook(promptText, attachments = []) {
@@ -1244,6 +1307,177 @@ console.log('Kruger.ai UI Loaded');
       }
     });
   }
+
+  /* ══════════════════════════════════════════════════════════════════
+     GALLERY & LIGHTBOX MODAL LOGIC
+     ══════════════════════════════════════════════════════════════════ */
+  (function initGalleryModal() {
+    const navGallery = document.getElementById('nav-gallery');
+    const overlay = document.getElementById('gallery-modal-overlay');
+    const closeBtn = document.getElementById('gallery-close-btn');
+    const grid = document.getElementById('gallery-grid');
+    const searchInput = document.getElementById('gallery-search');
+
+    const lightboxOverlay = document.getElementById('lightbox-modal-overlay');
+    const lightboxClose = document.getElementById('lightbox-close-btn');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxPrompt = document.getElementById('lightbox-prompt');
+    const lightboxUrlDisplay = document.getElementById('lightbox-url-display');
+    const lightboxCopyBtn = document.getElementById('lightbox-copy-btn');
+    const lightboxDlBtn = document.getElementById('lightbox-dl-btn');
+
+    let allGalleryItems = [];
+
+    function openLightbox(item) {
+      if (!lightboxOverlay) return;
+      lightboxImg.src = item.publicUrl || item.url;
+      lightboxPrompt.textContent = `"${item.prompt || 'Generated AI Photo'}"`;
+      lightboxUrlDisplay.textContent = item.publicUrl || `${window.location.origin}${item.url}`;
+      lightboxDlBtn.href = item.publicUrl || item.url;
+
+      lightboxCopyBtn.onclick = () => {
+        navigator.clipboard.writeText(item.publicUrl || `${window.location.origin}${item.url}`);
+        lightboxCopyBtn.textContent = '✅ Copied!';
+        setTimeout(() => { lightboxCopyBtn.textContent = '📋 Copy Public URL'; }, 2000);
+      };
+
+      lightboxOverlay.style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      if (lightboxOverlay) lightboxOverlay.style.display = 'none';
+    }
+
+    if (lightboxClose) lightboxClose.onclick = closeLightbox;
+    if (lightboxOverlay) lightboxOverlay.onclick = (e) => {
+      if (e.target === lightboxOverlay) closeLightbox();
+    };
+
+    // Make the single photo frame clickable for full lightbox view!
+    const singleFrameImg = document.getElementById('single-frame-img');
+    if (singleFrameImg) {
+      singleFrameImg.style.cursor = 'pointer';
+      singleFrameImg.title = 'Click to view full image';
+      singleFrameImg.onclick = () => {
+        const publicUrlInput = document.getElementById('public-url-input');
+        const promptTag = document.getElementById('single-frame-prompt');
+        openLightbox({
+          publicUrl: publicUrlInput ? publicUrlInput.value : singleFrameImg.src,
+          url: singleFrameImg.src,
+          prompt: promptTag ? promptTag.textContent.replace(/^"|"$/g, '') : 'Generated AI Photo'
+        });
+      };
+    }
+
+    async function loadGalleryItems() {
+      if (!grid) return;
+      grid.innerHTML = '<div style="color:#94a3b8; font-size:0.9rem; grid-column: 1/-1; text-align:center; padding: 40px 0;">Loading images from MongoDB Atlas...</div>';
+
+      try {
+        const res = await fetch('/api/images');
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          allGalleryItems = data;
+          renderGrid(allGalleryItems);
+        } else {
+          grid.innerHTML = '<div style="color:#f87171; grid-column: 1/-1; text-align:center; padding: 40px 0;">Failed to load gallery items.</div>';
+        }
+      } catch (err) {
+        console.error('Gallery Fetch Error:', err);
+        grid.innerHTML = '<div style="color:#f87171; grid-column: 1/-1; text-align:center; padding: 40px 0;">Error connecting to Atlas database.</div>';
+      }
+    }
+
+    function renderGrid(items) {
+      if (!grid) return;
+      if (items.length === 0) {
+        grid.innerHTML = '<div style="color:#94a3b8; grid-column: 1/-1; text-align:center; padding: 40px 0;">No generated images found in MongoDB Atlas. Generate your first image to populate the gallery!</div>';
+        return;
+      }
+
+      grid.innerHTML = items.map(item => {
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '';
+        return `
+          <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="height: 160px; background: rgba(0,0,0,0.5); position: relative; overflow: hidden; cursor: pointer;" onclick="window.krugerOpenLightbox('${item._id}')">
+              <img src="${item.publicUrl}" alt="${item.prompt}" style="width: 100%; height: 100%; object-fit: cover;">
+              <span style="position: absolute; top: 8px; right: 8px; background: rgba(16, 185, 129, 0.85); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; backdrop-filter: blur(4px);">${item.platform || 'Instagram'}</span>
+            </div>
+            <div style="padding: 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <p style="margin: 0; font-size: 0.85rem; font-weight: 600; color: #f8fafc; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">"${item.prompt}"</p>
+                <p style="margin: 6px 0 0 0; font-size: 0.75rem; color: #38bdf8; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.publicUrl}</p>
+              </div>
+              <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; pt-2; border-top: 1px solid rgba(255,255,255,0.08);">
+                <span style="font-size: 0.7rem; color: #64748b;">${dateStr}</span>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" onclick="window.krugerCopyUrl('${item.publicUrl}', this)" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #a5b4fc; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">📋 Copy</button>
+                  <button type="button" onclick="window.krugerDelete('${item._id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.krugerOpenLightbox = function(id) {
+      const item = allGalleryItems.find(i => i._id === id);
+      if (item) openLightbox(item);
+    };
+
+    window.krugerCopyUrl = function(url, btn) {
+      navigator.clipboard.writeText(url);
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copied';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    };
+
+    window.krugerDelete = async function(id) {
+      if (!confirm('Are you sure you want to delete this image from MongoDB Atlas?')) return;
+      try {
+        const res = await fetch(`/api/images/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          allGalleryItems = allGalleryItems.filter(i => i._id !== id);
+          renderGrid(allGalleryItems);
+        }
+      } catch (err) {
+        console.error('Delete error:', err);
+      }
+    };
+
+    if (searchInput) {
+      searchInput.oninput = () => {
+        const query = searchInput.value.toLowerCase();
+        const filtered = allGalleryItems.filter(item => 
+          (item.prompt && item.prompt.toLowerCase().includes(query)) ||
+          (item.title && item.title.toLowerCase().includes(query))
+        );
+        renderGrid(filtered);
+      };
+    }
+
+    if (navGallery && overlay) {
+      navGallery.onclick = (e) => {
+        e.preventDefault();
+        overlay.style.display = 'flex';
+        loadGalleryItems();
+      };
+    }
+
+    if (closeBtn && overlay) {
+      closeBtn.onclick = () => {
+        overlay.style.display = 'none';
+      };
+    }
+
+    if (overlay) {
+      overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.style.display = 'none';
+      };
+    }
+  })();
 
 })();
 
