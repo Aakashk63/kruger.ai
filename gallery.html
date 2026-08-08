@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery - Kruger.ai Cloud Vault</title>
+  <meta name="description" content="View all AI generated images and user prompts stored persistently in MongoDB Atlas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="Favicon.png?v=2" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background-color: #05070f;
+      color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-header {
+      background: rgba(10, 15, 30, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 24px;
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .gallery-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px 64px 24px;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    .gallery-top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .gallery-title-area h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0 0 6px 0;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gallery-subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .db-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #34d399;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .search-box-wrap {
+      position: relative;
+      min-width: 280px;
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 10px 16px 10px 40px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .search-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .gallery-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.15);
+    }
+
+    .card-media-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 75%; /* 4:3 Aspect Ratio */
+      background: #090d16;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .card-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-card:hover .card-img {
+      transform: scale(1.04);
+    }
+
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-prompt {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-style: italic;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #64748b;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .action-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #fff;
+    }
+
+    .action-btn.delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 5, 12, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .lightbox-overlay.active {
+      display: flex;
+    }
+
+    .lightbox-content {
+      max-width: 900px;
+      width: 100%;
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .lightbox-img-wrap {
+      flex: 1;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 300px;
+      max-height: 65vh;
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .lightbox-info {
+      padding: 20px 24px;
+      background: #0d1322;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      z-index: 10;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="gallery-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo-container">
+        <span style="font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">Kruger.ai</span>
+        <span class="logo-badge">Atlas Vault</span>
+      </a>
+      <a href="index.html" class="nav-btn">
+        <span>←</span> Back to Generator
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="gallery-container">
+
+    <div class="gallery-top-bar">
+      <div class="gallery-title-area">
+        <h1>🖼️ AI Image Gallery</h1>
+        <p class="gallery-subtitle">
+          All images automatically stored in MongoDB Atlas
+          <span class="db-status-pill" id="db-pill">● Connecting...</span>
+        </p>
+      </div>
+
+      <div class="search-box-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="gallery-search" class="search-input" placeholder="Search prompts..." />
+      </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div id="gallery-grid" class="gallery-grid">
+      <div class="empty-state">
+        <p style="font-size: 18px; color: #cbd5e1; margin-bottom: 8px;">Loading saved images from MongoDB Atlas...</p>
+        <p style="font-size: 14px; color: #64748b;">Please wait a moment while we retrieve your generated content.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Lightbox Overlay -->
+  <div id="lightbox" class="lightbox-overlay">
+    <div class="lightbox-content">
+      <button id="lightbox-close" class="lightbox-close">&times;</button>
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" class="lightbox-img" src="" alt="Full view" />
+      </div>
+      <div class="lightbox-info">
+        <p id="lightbox-prompt" style="font-size: 15px; color: #f1f5f9; font-style: italic; margin: 0;"></p>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="lightbox-url-input" readonly style="flex: 1; background: #05070f; border: 1px solid rgba(255,255,255,0.15); color: #a5b4fc; padding: 8px 12px; border-radius: 6px; font-size: 12px;" />
+          <button id="lightbox-copy-btn" class="action-btn" style="flex: 0 0 auto; background: #4f46e5; border: none; color: #fff; padding: 8px 16px;">📋 Copy Public URL</button>
+          <a id="lightbox-dl-btn" href="#" download class="action-btn" style="flex: 0 0 auto; background: rgba(255,255,255,0.1);">⬇️ Download</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    let allGalleryItems = [];
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        return new Promise((resolve, reject) => {
+          try {
+            document.execCommand('copy');
+            textArea.remove();
+            resolve();
+          } catch (e) {
+            textArea.remove();
+            reject(e);
+          }
+        });
+      }
+    }
+
+    async function fetchGalleryFromDB() {
+      const grid = document.getElementById('gallery-grid');
+      const dbPill = document.getElementById('db-pill');
+
+      try {
+        const res = await fetch('/api/images');
+        if (!res.ok) throw new Error('Failed to fetch images');
+        const data = await res.json();
+        
+        allGalleryItems = data;
+
+        if (dbPill) {
+          dbPill.textContent = `● Connected (${data.length} stored)`;
+          dbPill.style.color = '#34d399';
+          dbPill.style.background = 'rgba(52, 211, 153, 0.1)';
+        }
+
+        renderGalleryItems(data);
+      } catch (err) {
+        console.error('Error fetching gallery:', err);
+        if (dbPill) {
+          dbPill.textContent = '● Offline / Error';
+          dbPill.style.color = '#f87171';
+        }
+        if (grid) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <p style="font-size: 18px; color: #f87171; margin-bottom: 8px;">Failed to connect to MongoDB Atlas</p>
+              <p style="font-size: 14px; color: #94a3b8; margin-bottom: 16px;">Ensure server & database connection is active.</p>
+              <a href="index.html" class="nav-btn">Return to Generator</a>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function renderGalleryItems(items) {
+      const grid = document.getElementById('gallery-grid');
+      if (!grid) return;
+
+      if (!items || items.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <p style="font-size: 20px; color: #f1f5f9; font-weight: 600; margin-bottom: 8px;">No generated images yet</p>
+            <p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Generations will automatically appear here when saved to MongoDB Atlas.</p>
+            <a href="index.html" class="nav-btn" style="background: #4f46e5; border: none; color: #fff;">⚡ Generate New Content</a>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = items.map(item => {
+        const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
+        const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+
+        return `
+          <div class="gallery-card" data-id="${item._id}">
+            <div class="card-media-wrap" onclick="openLightbox('${item._id}', '${fullUrl}', \`${(item.prompt || '').replace(/`/g, '\\`')}\`)">
+              <img src="${fullUrl}" class="card-img" alt="Generated Photo" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <p class="card-prompt">"${item.prompt || 'Generated AI Photo'}"</p>
+              <div class="card-meta">
+                <span>${dateStr}</span>
+                <span style="color: #818cf8; font-weight: 500;">${item.platform || 'Instagram'}</span>
+              </div>
+              <div class="card-actions">
+                <button class="action-btn" onclick="copyCardUrl('${fullUrl}', this)">📋 Copy Link</button>
+                <a class="action-btn" href="${fullUrl}" download="kruger_${item._id}.png">⬇️ Download</a>
+                <button class="action-btn delete-btn" onclick="deleteCardItem('${item._id}', this)">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.openLightbox = (id, imgUrl, promptText) => {
+      const overlay = document.getElementById('lightbox');
+      const img = document.getElementById('lightbox-img');
+      const promptEl = document.getElementById('lightbox-prompt');
+      const inputEl = document.getElementById('lightbox-url-input');
+      const dlBtn = document.getElementById('lightbox-dl-btn');
+
+      if (img) img.src = imgUrl;
+      if (promptEl) promptEl.textContent = `"${promptText}"`;
+      if (inputEl) inputEl.value = imgUrl;
+      if (dlBtn) dlBtn.href = imgUrl;
+
+      if (overlay) overlay.classList.add('active');
+    };
+
+    const lbClose = document.getElementById('lightbox-close');
+    const lbOverlay = document.getElementById('lightbox');
+    if (lbClose) lbClose.onclick = () => lbOverlay.classList.remove('active');
+    if (lbOverlay) lbOverlay.onclick = (e) => { if (e.target === lbOverlay) lbOverlay.classList.remove('active'); };
+
+    const lbCopy = document.getElementById('lightbox-copy-btn');
+    if (lbCopy) {
+      lbCopy.onclick = () => {
+        const input = document.getElementById('lightbox-url-input');
+        if (input && input.value) {
+          copyToClipboard(input.value).then(() => {
+            const orig = lbCopy.textContent;
+            lbCopy.textContent = '✅ Copied!';
+            setTimeout(() => lbCopy.textContent = orig, 2000);
+          });
+        }
+      };
+    }
+
+    window.copyCardUrl = (url, btn) => {
+      copyToClipboard(url).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ Copied!';
+        setTimeout(() => btn.innerHTML = orig, 2000);
+      });
+    };
+
+    window.deleteCardItem = async (id, btn) => {
+      if (!confirm('Are you sure you want to delete this generated image from MongoDB Atlas?')) return;
+      try {
+        const res = await fetch(`/api/images/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          allGalleryItems = allGalleryItems.filter(i => i._id !== id);
+          renderGalleryItems(allGalleryItems);
+        } else {
+          alert('Failed to delete item.');
+        }
+      } catch (err) {
+        alert('Delete error.');
+      }
+    };
+
+    // Real-time search filter
+    const searchInput = document.getElementById('gallery-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        if (!q) {
+          renderGalleryItems(allGalleryItems);
+        } else {
+          const filtered = allGalleryItems.filter(i => (i.prompt || '').toLowerCase().includes(q));
+          renderGalleryItems(filtered);
+        }
+      });
+    }
+
+    // Initialize on page load
+    fetchGalleryFromDB();
+  </script>
+</body>
+
+</html>
