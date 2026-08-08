@@ -1,11 +1,13 @@
 {
   "name": "kruger-ai",
   "version": "1.0.0",
-  "description": "Kruger.ai with MongoDB Atlas Image & Prompt Storage",
+  "description": "Kruger.ai - AI Social Media Content Generator with MongoDB Atlas & Vercel Vite Stack",
+  "type": "commonjs",
   "main": "server.js",
   "scripts": {
+    "dev": "node server.js",
     "start": "node server.js",
-    "dev": "node server.js"
+    "build": "vite build"
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -13,5 +15,8 @@
     "express": "^5.2.1",
     "mongoose": "^9.9.1",
     "multer": "^2.2.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
   }
 }
