@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -9,6 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Serve static files from root directory
+const rootDir = path.join(__dirname, '..');
+app.use(express.static(rootDir));
 
 // MongoDB Atlas Connection URI
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://pavanskumar547_db_user:rampavan123@cluster0.8namazy.mongodb.net/image_generation?retryWrites=true&w=majority&appName=Cluster0';
@@ -27,15 +32,16 @@ async function connectToDatabase() {
   return cachedDb;
 }
 
-// Middleware to ensure DB connection per request
+// Middleware to ensure DB connection per API request
 app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (err) {
-    console.error('MongoDB Atlas Connection Error:', err);
-    res.status(500).json({ error: 'Database connection failed' });
+  if (req.path.startsWith('/api')) {
+    try {
+      await connectToDatabase();
+    } catch (err) {
+      console.error('MongoDB Atlas Connection Error:', err);
+    }
   }
+  next();
 });
 
 // Mongoose Schema (Collection: "generated data")
@@ -203,6 +209,11 @@ app.delete('/api/images/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete image' });
   }
+});
+
+// Fallback to index.html for all non-API website routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(rootDir, 'index.html'));
 });
 
 // Export App for Vercel Serverless Function
