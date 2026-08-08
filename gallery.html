@@ -526,9 +526,27 @@
       }
     }
 
+    const PUBLIC_VERCEL_DOMAIN = 'https://kruger-ai-waa1.vercel.app';
+
+    function resolvePublicUrl(itemOrUrl) {
+      if (!itemOrUrl) return `${PUBLIC_VERCEL_DOMAIN}/api/images`;
+      let fullUrl = (typeof itemOrUrl === 'string') ? itemOrUrl : (itemOrUrl.publicUrl || `/api/images/${itemOrUrl._id}/file`);
+      
+      if (!fullUrl.startsWith('http')) {
+        const origin = (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))
+          ? PUBLIC_VERCEL_DOMAIN
+          : window.location.origin;
+        fullUrl = `${origin}${fullUrl}`;
+      }
+
+      return fullUrl.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, PUBLIC_VERCEL_DOMAIN);
+    }
+
     function renderGalleryItems(items) {
       const grid = document.getElementById('gallery-grid');
       if (!grid) return;
+
+      allGalleryItems = items;
 
       if (!items || items.length === 0) {
         grid.innerHTML = `
@@ -542,8 +560,7 @@
       }
 
       grid.innerHTML = items.map(item => {
-        const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
-        const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
+        const fullUrl = resolvePublicUrl(item);
         const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
         const safePrompt = (item.prompt || 'Generated AI Photo').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -575,8 +592,7 @@
           const id = wrap.getAttribute('data-id');
           const item = allGalleryItems.find(i => i._id === id);
           if (item) {
-            const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
-            const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
+            const fullUrl = resolvePublicUrl(item);
             openLightbox(id, fullUrl, item.prompt || '');
           }
         };
@@ -587,8 +603,7 @@
           const id = btn.getAttribute('data-id');
           const item = allGalleryItems.find(i => i._id === id);
           if (item) {
-            const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
-            const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
+            const fullUrl = resolvePublicUrl(item);
             postToInstagram(fullUrl, item.prompt || '', btn);
           }
         };
@@ -611,16 +626,17 @@
 
     const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/ce05c98a-a70e-4c0f-963f-82aed2cb5b8e';
 
-    async function sendToInstagramWebhook(promptText, imageUrl) {
+    async function sendToInstagramWebhook(promptText, rawImageUrl) {
+      const publicUrl = resolvePublicUrl(rawImageUrl);
       const payload = {
         prompt: promptText,
         text: promptText,
         message: promptText,
-        publicUrl: imageUrl,
-        imageUrl: imageUrl,
-        image_url: imageUrl,
-        image: imageUrl,
-        url: imageUrl,
+        publicUrl: publicUrl,
+        imageUrl: publicUrl,
+        image_url: publicUrl,
+        image: publicUrl,
+        url: publicUrl,
         platform: 'Instagram',
         action: 'post_to_instagram',
         timestamp: new Date().toISOString()

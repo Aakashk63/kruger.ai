@@ -277,13 +277,18 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
       subtitle.textContent = 'High quality decoded photo output';
     }
     const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/ce05c98a-a70e-4c0f-963f-82aed2cb5b8e';
+    const PUBLIC_VERCEL_DOMAIN = 'https://kruger-ai-waa1.vercel.app';
     const igBtn = document.getElementById('single-frame-ig-btn');
     if (igBtn) {
       igBtn.disabled = false;
       igBtn.onclick = async () => {
         const publicUrlInput = document.getElementById('public-url-input');
-        const finalUrl = (publicUrlInput && publicUrlInput.value && publicUrlInput.value.startsWith('http')) ? publicUrlInput.value : imageUrl;
-        
+        let finalUrl = (publicUrlInput && publicUrlInput.value && publicUrlInput.value.startsWith('http')) ? publicUrlInput.value : imageUrl;
+        if (!finalUrl.startsWith('http')) {
+          finalUrl = `${PUBLIC_VERCEL_DOMAIN}${finalUrl}`;
+        }
+        finalUrl = finalUrl.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, PUBLIC_VERCEL_DOMAIN);
+
         const payload = {
           prompt: promptText || 'Generated AI Photo',
           text: promptText || 'Generated AI Photo',
