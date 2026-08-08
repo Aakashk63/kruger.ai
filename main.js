@@ -276,10 +276,41 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     if (subtitle) {
       subtitle.textContent = 'High quality decoded photo output';
     }
+    const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/04e95b23-2d6c-4d45-96be-f9e6dcc1532fb';
     const igBtn = document.getElementById('single-frame-ig-btn');
     if (igBtn) {
       igBtn.disabled = false;
-      igBtn.onclick = () => {
+      igBtn.onclick = async () => {
+        const publicUrlInput = document.getElementById('public-url-input');
+        const finalUrl = (publicUrlInput && publicUrlInput.value && publicUrlInput.value.startsWith('http')) ? publicUrlInput.value : imageUrl;
+        
+        const payload = {
+          prompt: promptText || 'Generated AI Photo',
+          text: promptText || 'Generated AI Photo',
+          message: promptText || 'Generated AI Photo',
+          imageUrl: finalUrl,
+          publicUrl: finalUrl,
+          image_url: finalUrl,
+          image: finalUrl,
+          platform: 'Instagram',
+          action: 'post_to_instagram',
+          timestamp: new Date().toISOString()
+        };
+
+        const origText = igBtn.innerHTML;
+        igBtn.innerHTML = '🚀 Sending to Webhook...';
+
+        try {
+          console.log('[Instagram Webhook POST] Sending payload:', payload);
+          await fetch(INSTAGRAM_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } catch (e) {
+          console.error('[Instagram Webhook POST Error]:', e);
+        }
+
         const caption = `✨ ${promptText || 'AI Generated Content'}\n\nCreated with Kruger.ai 🚀\n\n#KrugerAI #AIPoster #InstagramContent #ContentCreator #GeneratedWithAI`;
         copyTextToClipboard(caption).then(() => {
           const a = document.createElement('a');
@@ -290,7 +321,8 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
           document.body.removeChild(a);
           setTimeout(() => {
             window.open('https://www.instagram.com/', '_blank');
-          }, 400);
+            igBtn.innerHTML = origText;
+          }, 500);
         });
       };
     }
