@@ -545,28 +545,68 @@
         const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
         const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
         const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+        const safePrompt = (item.prompt || 'Generated AI Photo').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
         return `
           <div class="gallery-card" data-id="${item._id}">
-            <div class="card-media-wrap" onclick="openLightbox('${item._id}', '${fullUrl}', \`${(item.prompt || '').replace(/`/g, '\\`')}\`)">
+            <div class="card-media-wrap" data-id="${item._id}">
               <img src="${fullUrl}" class="card-img" alt="Generated Photo" loading="lazy" />
             </div>
             <div class="card-body">
-              <p class="card-prompt">"${item.prompt || 'Generated AI Photo'}"</p>
+              <p class="card-prompt">"${safePrompt}"</p>
               <div class="card-meta">
                 <span>${dateStr}</span>
                 <span style="color: #818cf8; font-weight: 500;">${item.platform || 'Instagram'}</span>
               </div>
               <div class="card-actions">
-                <button class="action-btn" style="background: linear-gradient(135deg, #e1306c, #f77737); border: none; color: #fff; font-weight: 600;" onclick="postToInstagram('${fullUrl}', \`${(item.prompt || '').replace(/`/g, '\\`')}\`, this)">📸 Post to Instagram</button>
-                <button class="action-btn" onclick="copyCardUrl('${fullUrl}', this)">📋 Copy Link</button>
+                <button class="action-btn post-ig-btn" data-id="${item._id}" style="background: linear-gradient(135deg, #e1306c, #f77737); border: none; color: #fff; font-weight: 600;">📸 Post to Instagram</button>
+                <button class="action-btn copy-url-btn" data-url="${fullUrl}">📋 Copy Link</button>
                 <a class="action-btn" href="${fullUrl}" download="kruger_${item._id}.png">⬇️ Download</a>
-                <button class="action-btn delete-btn" onclick="deleteCardItem('${item._id}', this)">🗑️</button>
+                <button class="action-btn delete-card-btn" data-id="${item._id}">🗑️</button>
               </div>
             </div>
           </div>
         `;
       }).join('');
+
+      // Dynamic Event Listeners for clean prompt quote handling
+      grid.querySelectorAll('.card-media-wrap').forEach(wrap => {
+        wrap.onclick = () => {
+          const id = wrap.getAttribute('data-id');
+          const item = allGalleryItems.find(i => i._id === id);
+          if (item) {
+            const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
+            const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
+            openLightbox(id, fullUrl, item.prompt || '');
+          }
+        };
+      });
+
+      grid.querySelectorAll('.post-ig-btn').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.getAttribute('data-id');
+          const item = allGalleryItems.find(i => i._id === id);
+          if (item) {
+            const rawUrl = item.publicUrl || `/api/images/${item._id}/file`;
+            const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${window.location.origin}${rawUrl}`;
+            postToInstagram(fullUrl, item.prompt || '', btn);
+          }
+        };
+      });
+
+      grid.querySelectorAll('.copy-url-btn').forEach(btn => {
+        btn.onclick = () => {
+          const url = btn.getAttribute('data-url');
+          copyCardUrl(url, btn);
+        };
+      });
+
+      grid.querySelectorAll('.delete-card-btn').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.getAttribute('data-id');
+          deleteCardItem(id, btn);
+        };
+      });
     }
 
     const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/ce05c98a-a70e-4c0f-963f-82aed2cb5b8e';
