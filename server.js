@@ -63,8 +63,8 @@ mongoose.connection.on('disconnected', () => {
 const generatedDataSchema = new mongoose.Schema({
   prompt: { type: String, required: true, trim: true },
   title: { type: String, default: 'Generated AI Photo', trim: true },
-  image: { type: String, required: true }, // Base64 image data string
-  data: { type: Buffer },                  // Binary buffer for direct public URL streaming
+  image: { type: String, required: true }, // Base64 image data string or URL
+  data: { type: Buffer },                  // Binary buffer
   contentType: { type: String, default: 'image/png' },
   size: { type: Number, default: 0 },
   platform: { type: String, default: 'Instagram' },
@@ -75,7 +75,7 @@ const generatedDataSchema = new mongoose.Schema({
 
 generatedDataSchema.index({ prompt: 'text', title: 'text' });
 
-const GeneratedData = mongoose.model('GeneratedData', generatedDataSchema, 'generated data');
+const GeneratedData = mongoose.models.GeneratedData || mongoose.model('GeneratedData', generatedDataSchema, 'generated data');
 
 // Configure Multer Memory Storage
 const storage = multer.memoryStorage();
@@ -84,8 +84,17 @@ const upload = multer({
   limits: { fileSize: 25 * 1024 * 1024 }
 });
 
-// Helper function to parse Base64 data URL
+// Robust Helper function to parse Base64 or URL image inputs
 function parseBase64Image(dataString) {
+  if (!dataString) {
+    return {
+      contentType: 'image/png',
+      buffer: Buffer.from([]),
+      fullDataUrl: ''
+    };
+  }
+
+  // Handle direct Data URL
   const matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
   if (matches && matches.length === 3) {
     return {
@@ -94,10 +103,29 @@ function parseBase64Image(dataString) {
       fullDataUrl: dataString
     };
   }
-  const defaultUrl = dataString.startsWith('data:') ? dataString : `data:image/png;base64,${dataString}`;
+
+  // Handle HTTP/HTTPS external image URLs
+  if (dataString.startsWith('http://') || dataString.startsWith('https://')) {
+    return {
+      contentType: 'image/png',
+      buffer: Buffer.from([]),
+      fullDataUrl: dataString
+    };
+  }
+
+  // Handle raw base64 string
+  const cleanStr = dataString.replace(/^data:image\/\w+;base64,/, '').trim();
+  const defaultUrl = dataString.startsWith('data:') ? dataString : `data:image/png;base64,${cleanStr}`;
+  let buf;
+  try {
+    buf = Buffer.from(cleanStr, 'base64');
+  } catch (e) {
+    buf = Buffer.from([]);
+  }
+
   return {
     contentType: 'image/png',
-    buffer: Buffer.from(dataString.replace(/^data:image\/\w+;base64,/, ''), 'base64'),
+    buffer: buf,
     fullDataUrl: defaultUrl
   };
 }
@@ -133,16 +161,13 @@ app.post('/api/save-image', async (req, res) => {
     if (!imageData) {
       return res.status(400).json({ error: 'No image data provided.' });
     }
-    if (!prompt || prompt.trim() === '') {
-      return res.status(400).json({ error: 'User prompt is required.' });
-    }
 
+    const cleanPrompt = (prompt && prompt.trim()) ? prompt.trim() : 'Generated AI Photo';
     const parsed = parseBase64Image(imageData);
 
-    // Instantiate new document matching exact schema
     const newDoc = new GeneratedData({
-      prompt: prompt.trim(),
-      title: title || prompt.trim().substring(0, 50),
+      prompt: cleanPrompt,
+      title: title || cleanPrompt.substring(0, 50),
       image: parsed.fullDataUrl,
       data: parsed.buffer,
       contentType: parsed.contentType,
@@ -154,11 +179,10 @@ app.post('/api/save-image', async (req, res) => {
 
     const saved = await newDoc.save();
 
-    const host = req.get('host');
-    const protocol = req.protocol;
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const publicUrl = `${protocol}://${host}/api/images/${saved._id}/file`;
 
-    // Save publicUrl to document
     saved.publicUrl = publicUrl;
     await saved.save();
 
@@ -169,11 +193,12 @@ app.post('/api/save-image', async (req, res) => {
       data: {
         _id: saved._id,
         prompt: saved.prompt,
-        image: saved.image.substring(0, 60) + '...',
+        image: saved.image ? (saved.image.substring(0, 60) + '...') : '',
         platform: saved.platform,
         createdAt: saved.createdAt,
         timestamp: saved.timestamp,
-        publicUrl: saved.publicUrl
+        publicUrl: saved.publicUrl,
+        url: `/api/images/${saved._id}/file`
       }
     });
   } catch (error) {
@@ -231,7 +256,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-// List All Generated Data (Excludes heavy image string for speed)
+// List All Generated Data
 app.get('/api/images', async (req, res) => {
   try {
     const isConnected = mongoose.connection.readyState === 1;
@@ -242,6 +267,9 @@ app.get('/api/images', async (req, res) => {
 
     const items = await GeneratedData.find().select('-data -image').sort({ createdAt: -1 });
 
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+
     const formatted = items.map(item => ({
       _id: item._id,
       prompt: item.prompt,
@@ -249,7 +277,8 @@ app.get('/api/images', async (req, res) => {
       platform: item.platform,
       createdAt: item.createdAt,
       timestamp: item.timestamp,
-      publicUrl: item.publicUrl || `${req.protocol}://${req.get('host')}/api/images/${item._id}/file`
+      publicUrl: item.publicUrl || `${protocol}://${host}/api/images/${item._id}/file`,
+      url: `/api/images/${item._id}/file`
     }));
 
     res.json(formatted);
@@ -266,16 +295,20 @@ app.get('/api/images/:id/file', async (req, res) => {
       return res.status(404).send('Image not found');
     }
 
+    if (item.image && (item.image.startsWith('http://') || item.image.startsWith('https://'))) {
+      return res.redirect(item.image);
+    }
+
     let buffer = item.data;
-    if (!buffer && item.image) {
+    if ((!buffer || buffer.length === 0) && item.image) {
       const match = item.image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
       if (match) {
         buffer = Buffer.from(match[2], 'base64');
       }
     }
 
-    if (!buffer) {
-      return res.status(404).send('Image buffer missing');
+    if (!buffer || buffer.length === 0) {
+      return res.status(404).send('Image data missing');
     }
 
     res.set({

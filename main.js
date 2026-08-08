@@ -294,6 +294,31 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     saveImageToMongoDBAtlas(imageUrl, promptText);
   }
 
+  function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      return new Promise((resolve, reject) => {
+        try {
+          const successful = document.execCommand('copy');
+          textArea.remove();
+          if (successful) resolve(); else reject(new Error('copy command failed'));
+        } catch (err) {
+          textArea.remove();
+          reject(err);
+        }
+      });
+    }
+  }
+
   async function saveImageToMongoDBAtlas(imageUrl, promptText) {
     const dbBox = document.getElementById('db-public-url-box');
     const urlInput = document.getElementById('public-url-input');
@@ -312,20 +337,40 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     }
 
     try {
+      // If imageUrl is relative or DOM image, convert to data URL if needed
+      let finalImageData = imageUrl;
+      if (!finalImageData || (!finalImageData.startsWith('data:') && !finalImageData.startsWith('http'))) {
+        const singleImg = document.getElementById('single-frame-img');
+        if (singleImg && singleImg.src && singleImg.src.startsWith('data:')) {
+          finalImageData = singleImg.src;
+        }
+      }
+
       const res = await fetch('/api/save-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageData: imageUrl,
+          imageData: finalImageData,
           prompt: promptText || 'Generated AI Photo',
           title: promptText ? promptText.substring(0, 40) : 'Generated Content'
         })
       });
 
       const resp = await res.json();
-      const itemData = resp.data || resp.image;
-      if (res.ok && itemData && itemData.publicUrl) {
-        if (urlInput) urlInput.value = itemData.publicUrl;
+      const itemData = resp.data || resp;
+      if (res.ok && itemData && (itemData.publicUrl || itemData._id)) {
+        let rawUrl = itemData.publicUrl || `${window.location.origin}/api/images/${itemData._id}/file`;
+        
+        // Convert any localhost / backend URL to current shareable domain (e.g. Vercel)
+        let fullPublicUrl = rawUrl;
+        if (rawUrl.startsWith('/')) {
+          fullPublicUrl = `${window.location.origin}${rawUrl}`;
+        } else if (rawUrl.includes('localhost:') && !window.location.host.includes('localhost')) {
+          const path = rawUrl.substring(rawUrl.indexOf('/api/'));
+          fullPublicUrl = `${window.location.origin}${path}`;
+        }
+
+        if (urlInput) urlInput.value = fullPublicUrl;
         if (statusLabel) {
           statusLabel.textContent = 'Stored in Atlas ✓';
           statusLabel.style.color = '#34d399';
@@ -333,15 +378,24 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
 
         if (copyBtn) {
           copyBtn.onclick = () => {
-            navigator.clipboard.writeText(itemData.publicUrl);
-            const origText = copyBtn.innerHTML;
-            copyBtn.innerHTML = '✅ Copied!';
-            setTimeout(() => { copyBtn.innerHTML = origText; }, 2000);
+            copyTextToClipboard(fullPublicUrl).then(() => {
+              const origText = copyBtn.innerHTML;
+              copyBtn.innerHTML = '✅ Copied!';
+              setTimeout(() => { copyBtn.innerHTML = origText; }, 2000);
+            }).catch(err => {
+              if (urlInput) {
+                urlInput.select();
+                document.execCommand('copy');
+                const origText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅ Copied!';
+                setTimeout(() => { copyBtn.innerHTML = origText; }, 2000);
+              }
+            });
           };
         }
       } else {
         if (statusLabel) {
-          statusLabel.textContent = 'Atlas Error';
+          statusLabel.textContent = 'Atlas Error: ' + (resp.error || 'Failed');
           statusLabel.style.color = '#f87171';
         }
       }

@@ -22,7 +22,7 @@ async function connectToDatabase() {
   }
   if (!cachedPromise) {
     cachedPromise = mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 8000,
       bufferCommands: false
     }).then(m => m.connection);
   }
@@ -50,7 +50,7 @@ app.use(async (req, res, next) => {
 const generatedDataSchema = new mongoose.Schema({
   prompt: { type: String, required: true, trim: true },
   title: { type: String, default: 'Generated AI Photo', trim: true },
-  image: { type: String, required: true }, // Base64 image string
+  image: { type: String, required: true }, // Base64 image string or URL
   data: { type: Buffer },                  // Binary buffer
   contentType: { type: String, default: 'image/png' },
   size: { type: Number, default: 0 },
@@ -62,8 +62,17 @@ const generatedDataSchema = new mongoose.Schema({
 
 const GeneratedData = mongoose.models.GeneratedData || mongoose.model('GeneratedData', generatedDataSchema, 'generated data');
 
-// Helper to parse base64
+// Robust Helper to parse base64 or URL image inputs
 function parseBase64Image(dataString) {
+  if (!dataString) {
+    return {
+      contentType: 'image/png',
+      buffer: Buffer.from([]),
+      fullDataUrl: ''
+    };
+  }
+
+  // Handle direct Data URL
   const matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
   if (matches && matches.length === 3) {
     return {
@@ -72,10 +81,29 @@ function parseBase64Image(dataString) {
       fullDataUrl: dataString
     };
   }
-  const defaultUrl = dataString.startsWith('data:') ? dataString : `data:image/png;base64,${dataString}`;
+
+  // Handle HTTP/HTTPS external image URLs
+  if (dataString.startsWith('http://') || dataString.startsWith('https://')) {
+    return {
+      contentType: 'image/png',
+      buffer: Buffer.from([]),
+      fullDataUrl: dataString
+    };
+  }
+
+  // Handle raw base64 string
+  const cleanStr = dataString.replace(/^data:image\/\w+;base64,/, '').trim();
+  const defaultUrl = dataString.startsWith('data:') ? dataString : `data:image/png;base64,${cleanStr}`;
+  let buf;
+  try {
+    buf = Buffer.from(cleanStr, 'base64');
+  } catch (e) {
+    buf = Buffer.from([]);
+  }
+
   return {
     contentType: 'image/png',
-    buffer: Buffer.from(dataString.replace(/^data:image\/\w+;base64,/, ''), 'base64'),
+    buffer: buf,
     fullDataUrl: defaultUrl
   };
 }
@@ -93,12 +121,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Save Generated Image & Prompt
+// Save Generated Image & Prompt to MongoDB Atlas
 app.post('/api/save-image', async (req, res) => {
   try {
     const isConnected = mongoose.connection.readyState === 1;
     if (!isConnected) {
-      return res.status(503).json({ error: 'MongoDB Atlas connecting... Please try again in a moment.' });
+      try {
+        await connectToDatabase();
+      } catch (dbErr) {
+        return res.status(503).json({ error: 'MongoDB Atlas connection initializing... Please retry in a moment.' });
+      }
     }
 
     const { imageData, prompt, title, platform } = req.body;
@@ -106,15 +138,12 @@ app.post('/api/save-image', async (req, res) => {
     if (!imageData) {
       return res.status(400).json({ error: 'No image data provided.' });
     }
-    if (!prompt || prompt.trim() === '') {
-      return res.status(400).json({ error: 'User prompt is required.' });
-    }
-
+    const cleanPrompt = (prompt && prompt.trim()) ? prompt.trim() : 'Generated AI Photo';
     const parsed = parseBase64Image(imageData);
 
     const newDoc = new GeneratedData({
-      prompt: prompt.trim(),
-      title: title || prompt.trim().substring(0, 50),
+      prompt: cleanPrompt,
+      title: title || cleanPrompt.substring(0, 50),
       image: parsed.fullDataUrl,
       data: parsed.buffer,
       contentType: parsed.contentType,
@@ -133,16 +162,19 @@ app.post('/api/save-image', async (req, res) => {
     saved.publicUrl = publicUrl;
     await saved.save();
 
+    console.log(`[MongoDB Atlas] Successfully stored in "image_generation"."generated data"! ID: ${saved._id}`);
+
     res.status(201).json({
       message: 'Generated image and prompt automatically stored in MongoDB Atlas!',
       data: {
         _id: saved._id,
         prompt: saved.prompt,
-        image: saved.image.substring(0, 60) + '...',
+        image: saved.image ? (saved.image.substring(0, 60) + '...') : '',
         platform: saved.platform,
         createdAt: saved.createdAt,
         timestamp: saved.timestamp,
-        publicUrl: saved.publicUrl
+        publicUrl: saved.publicUrl,
+        url: `/api/images/${saved._id}/file`
       }
     });
   } catch (error) {
@@ -151,12 +183,12 @@ app.post('/api/save-image', async (req, res) => {
   }
 });
 
-// List All Images (Lightweight)
+// List All Images (Lightweight for Gallery Modal)
 app.get('/api/images', async (req, res) => {
   try {
     const isConnected = mongoose.connection.readyState === 1;
     if (!isConnected) {
-      return res.json([]);
+      try { await connectToDatabase(); } catch (e) {}
     }
 
     const items = await GeneratedData.find().select('-data -image').sort({ createdAt: -1 });
@@ -171,7 +203,8 @@ app.get('/api/images', async (req, res) => {
       platform: item.platform,
       createdAt: item.createdAt,
       timestamp: item.timestamp,
-      publicUrl: item.publicUrl || `${protocol}://${host}/api/images/${item._id}/file`
+      publicUrl: item.publicUrl || `${protocol}://${host}/api/images/${item._id}/file`,
+      url: `/api/images/${item._id}/file`
     }));
 
     res.json(formatted);
@@ -186,7 +219,7 @@ app.get('/api/images/:id/file', async (req, res) => {
   try {
     const isConnected = mongoose.connection.readyState === 1;
     if (!isConnected) {
-      return res.status(503).send('Database connection initializing...');
+      try { await connectToDatabase(); } catch (e) {}
     }
 
     const item = await GeneratedData.findById(req.params.id);
@@ -194,14 +227,19 @@ app.get('/api/images/:id/file', async (req, res) => {
       return res.status(404).send('Image not found');
     }
 
+    // If external URL stored
+    if (item.image && (item.image.startsWith('http://') || item.image.startsWith('https://'))) {
+      return res.redirect(item.image);
+    }
+
     let buffer = item.data;
-    if (!buffer && item.image) {
+    if ((!buffer || buffer.length === 0) && item.image) {
       const match = item.image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
       if (match) buffer = Buffer.from(match[2], 'base64');
     }
 
-    if (!buffer) {
-      return res.status(404).send('Image buffer missing');
+    if (!buffer || buffer.length === 0) {
+      return res.status(404).send('Image data missing');
     }
 
     res.set({
