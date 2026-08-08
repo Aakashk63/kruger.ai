@@ -276,7 +276,7 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     if (subtitle) {
       subtitle.textContent = 'High quality decoded photo output';
     }
-    const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/04e95b23-2d6c-4d45-96be-f9e6dcc1532fb';
+    const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/ce05c98a-a70e-4c0f-963f-82aed2cb5b8e';
     const igBtn = document.getElementById('single-frame-ig-btn');
     if (igBtn) {
       igBtn.disabled = false;
@@ -288,10 +288,11 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
           prompt: promptText || 'Generated AI Photo',
           text: promptText || 'Generated AI Photo',
           message: promptText || 'Generated AI Photo',
-          imageUrl: finalUrl,
           publicUrl: finalUrl,
+          imageUrl: finalUrl,
           image_url: finalUrl,
           image: finalUrl,
+          url: finalUrl,
           platform: 'Instagram',
           action: 'post_to_instagram',
           timestamp: new Date().toISOString()
