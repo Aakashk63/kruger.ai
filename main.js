@@ -276,7 +276,7 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     if (subtitle) {
       subtitle.textContent = 'High quality decoded photo output';
     }
-    const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/ce05c98a-a70e-4c0f-963f-82aed2cb5b8e';
+    const INSTAGRAM_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/ce05c98a-a70e-4c0f-963f-82aed2cb5b8';
     const PUBLIC_VERCEL_DOMAIN = 'https://kruger-ai-neon.vercel.app';
     const igBtn = document.getElementById('single-frame-ig-btn');
     if (igBtn) {
