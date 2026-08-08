@@ -276,6 +276,25 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
     if (subtitle) {
       subtitle.textContent = 'High quality decoded photo output';
     }
+    const igBtn = document.getElementById('single-frame-ig-btn');
+    if (igBtn) {
+      igBtn.disabled = false;
+      igBtn.onclick = () => {
+        const caption = `✨ ${promptText || 'AI Generated Content'}\n\nCreated with Kruger.ai 🚀\n\n#KrugerAI #AIPoster #InstagramContent #ContentCreator #GeneratedWithAI`;
+        copyTextToClipboard(caption).then(() => {
+          const a = document.createElement('a');
+          a.href = imageUrl;
+          a.download = 'instagram_post.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => {
+            window.open('https://www.instagram.com/', '_blank');
+          }, 400);
+        });
+      };
+    }
+
     if (dlBtn) {
       dlBtn.disabled = false;
       dlBtn.onclick = () => {

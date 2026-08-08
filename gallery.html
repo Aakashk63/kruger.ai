@@ -23,7 +23,7 @@
     }
 
     .gallery-header {
-      background: rgba(10, 15, 30, 0.85);
+      background: rgba(10, 15, 30, 0.85); 
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -436,6 +436,33 @@
     </div>
   </div>
 
+  <!-- Instagram Post Modal -->
+  <div id="ig-modal" class="lightbox-overlay">
+    <div class="lightbox-content" style="max-width: 520px;">
+      <button id="ig-modal-close" class="lightbox-close">&times;</button>
+      <div style="padding: 20px 24px 12px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 26px;">📸</span>
+        <div>
+          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #fff;">Post to Instagram</h3>
+          <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Publish your AI generated poster directly to Instagram</p>
+        </div>
+      </div>
+      <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="width: 100%; height: 210px; background: #000; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <img id="ig-preview-img" src="" alt="Instagram preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+        </div>
+        <div>
+          <label style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Generated Instagram Caption & Hashtags</label>
+          <textarea id="ig-caption-text" rows="4" style="width: 100%; background: #05070f; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #e2e8f0; padding: 10px; font-size: 13px; font-family: inherit; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button id="ig-copy-caption-btn" class="action-btn" style="flex: 1; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); padding: 10px;">📋 Copy Caption</button>
+          <button id="ig-open-btn" class="action-btn" style="flex: 1; background: linear-gradient(135deg, #e1306c, #f77737); border: none; color: #fff; font-weight: 600; padding: 10px;">🚀 Open Instagram</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     let allGalleryItems = [];
 
@@ -531,6 +558,7 @@
                 <span style="color: #818cf8; font-weight: 500;">${item.platform || 'Instagram'}</span>
               </div>
               <div class="card-actions">
+                <button class="action-btn" style="background: linear-gradient(135deg, #e1306c, #f77737); border: none; color: #fff; font-weight: 600;" onclick="postToInstagram('${fullUrl}', \`${(item.prompt || '').replace(/`/g, '\\`')}\`)">📸 Post to Instagram</button>
                 <button class="action-btn" onclick="copyCardUrl('${fullUrl}', this)">📋 Copy Link</button>
                 <a class="action-btn" href="${fullUrl}" download="kruger_${item._id}.png">⬇️ Download</a>
                 <button class="action-btn delete-btn" onclick="deleteCardItem('${item._id}', this)">🗑️</button>
@@ -539,6 +567,57 @@
           </div>
         `;
       }).join('');
+    }
+
+    window.postToInstagram = (imgUrl, promptText) => {
+      const modal = document.getElementById('ig-modal');
+      const previewImg = document.getElementById('ig-preview-img');
+      const captionText = document.getElementById('ig-caption-text');
+      const openBtn = document.getElementById('ig-open-btn');
+
+      if (previewImg) previewImg.src = imgUrl;
+      const formattedCaption = `✨ ${promptText || 'AI Generated Content'}\n\nCreated with Kruger.ai 🚀\n\n#KrugerAI #AIPoster #InstagramContent #ContentCreator #GeneratedWithAI #SocialMediaPost`;
+      if (captionText) captionText.value = formattedCaption;
+
+      if (modal) modal.classList.add('active');
+
+      if (openBtn) {
+        openBtn.onclick = () => {
+          // Copy caption automatically
+          copyToClipboard(formattedCaption);
+          // Trigger image download
+          const a = document.createElement('a');
+          a.href = imgUrl;
+          a.download = 'instagram_post.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          // Open Instagram
+          setTimeout(() => {
+            window.open('https://www.instagram.com/', '_blank');
+          }, 400);
+        };
+      }
+    };
+
+    const igClose = document.getElementById('ig-modal-close');
+    const igModal = document.getElementById('ig-modal');
+    if (igClose) igClose.onclick = () => igModal.classList.remove('active');
+    if (igModal) igModal.onclick = (e) => { if (e.target === igModal) igModal.classList.remove('active'); };
+
+    const igCopyCap = document.getElementById('ig-copy-caption-btn');
+    if (igCopyCap) {
+      igCopyCap.onclick = () => {
+        const captionText = document.getElementById('ig-caption-text');
+        if (captionText && captionText.value) {
+          copyToClipboard(captionText.value).then(() => {
+            const orig = igCopyCap.textContent;
+            igCopyCap.textContent = '✅ Caption Copied!';
+            setTimeout(() => igCopyCap.textContent = orig, 2000);
+          });
+        }
+      };
     }
 
     window.openLightbox = (id, imgUrl, promptText) => {
