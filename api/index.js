@@ -14,28 +14,36 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://pavanskumar547_db_user:rampavan123@cluster0.8namazy.mongodb.net/image_generation?retryWrites=true&w=majority&appName=Cluster0';
 
 // Serverless Mongoose connection caching
-let cachedDb = null;
+let cachedPromise = null;
 
 async function connectToDatabase() {
-  if (cachedDb && mongoose.connection.readyState === 1) {
-    return cachedDb;
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
-  console.log('Connecting to MongoDB Atlas in serverless function...');
-  cachedDb = await mongoose.connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 10000,
-  });
-  return cachedDb;
+  if (!cachedPromise) {
+    cachedPromise = mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+      bufferCommands: false
+    }).then(m => m.connection);
+  }
+  try {
+    return await cachedPromise;
+  } catch (err) {
+    cachedPromise = null;
+    throw err;
+  }
 }
 
 // Middleware to ensure DB connection per API request
 app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (err) {
-    console.error('MongoDB Atlas Connection Error:', err);
-    res.status(500).json({ error: 'Database connection failed' });
+  if (req.path.startsWith('/api')) {
+    try {
+      await connectToDatabase();
+    } catch (err) {
+      console.error('Vercel Serverless MongoDB Atlas Connection Error:', err.message);
+    }
   }
+  next();
 });
 
 // Mongoose Schema (Collection: "generated data")
@@ -88,6 +96,11 @@ app.get('/api/health', (req, res) => {
 // Save Generated Image & Prompt
 app.post('/api/save-image', async (req, res) => {
   try {
+    const isConnected = mongoose.connection.readyState === 1;
+    if (!isConnected) {
+      return res.status(503).json({ error: 'MongoDB Atlas connecting... Please try again in a moment.' });
+    }
+
     const { imageData, prompt, title, platform } = req.body;
 
     if (!imageData) {
@@ -114,7 +127,7 @@ app.post('/api/save-image', async (req, res) => {
     const saved = await newDoc.save();
 
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
     const publicUrl = `${protocol}://${host}/api/images/${saved._id}/file`;
 
     saved.publicUrl = publicUrl;
@@ -141,10 +154,15 @@ app.post('/api/save-image', async (req, res) => {
 // List All Images (Lightweight)
 app.get('/api/images', async (req, res) => {
   try {
+    const isConnected = mongoose.connection.readyState === 1;
+    if (!isConnected) {
+      return res.json([]);
+    }
+
     const items = await GeneratedData.find().select('-data -image').sort({ createdAt: -1 });
 
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
 
     const formatted = items.map(item => ({
       _id: item._id,
@@ -158,6 +176,7 @@ app.get('/api/images', async (req, res) => {
 
     res.json(formatted);
   } catch (error) {
+    console.error('Get Images Error:', error);
     res.status(500).json({ error: 'Failed to retrieve generated data' });
   }
 });
@@ -165,6 +184,11 @@ app.get('/api/images', async (req, res) => {
 // Serve Public Image File directly
 app.get('/api/images/:id/file', async (req, res) => {
   try {
+    const isConnected = mongoose.connection.readyState === 1;
+    if (!isConnected) {
+      return res.status(503).send('Database connection initializing...');
+    }
+
     const item = await GeneratedData.findById(req.params.id);
     if (!item) {
       return res.status(404).send('Image not found');
@@ -203,6 +227,11 @@ app.delete('/api/images/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete image' });
   }
+});
+
+// Catch-all 404 for API routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'API route not found' });
 });
 
 // Export App for Vercel Serverless Function
