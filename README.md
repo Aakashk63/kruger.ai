@@ -19,34 +19,10 @@ Kruger.ai is a social media content generation web application integrated with *
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: Vite, HTML5, CSS3 (Glassmorphism design system), Vanilla JavaScript (ES Modules).
-- **Backend API**: Node.js, Express, Mongoose, Multer, CORS.
+- **Frontend**: Vite, HTML5, CSS3 (Glassmorphism design system).
+- **Backend API**: Node.js, MongoDb.
 - **Database**: MongoDB Atlas (`image_generation` database, `generated data` collection).
 - **Deployment**: Vercel Serverless Functions (`api/index.js`).
-
----
-
-## 🚀 Running Locally
-
-1. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Configure Environment Variables (`.env`)**:
-   ```env
-   MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/image_generation?retryWrites=true&w=majority
-   PORT=5000
-   ```
-
-3. **Start Development Server**:
-   ```bash
-   npm start
-   ```
-
-   Open `http://localhost:5000` in your browser.
-
----
 
 ## ☁️ Deploying on Vercel
 
