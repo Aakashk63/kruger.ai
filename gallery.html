@@ -558,7 +558,7 @@
                 <span style="color: #818cf8; font-weight: 500;">${item.platform || 'Instagram'}</span>
               </div>
               <div class="card-actions">
-                <button class="action-btn" style="background: linear-gradient(135deg, #e1306c, #f77737); border: none; color: #fff; font-weight: 600;" onclick="postToInstagram('${fullUrl}', \`${(item.prompt || '').replace(/`/g, '\\`')}\`)">📸 Post to Instagram</button>
+                <button class="action-btn" style="background: linear-gradient(135deg, #e1306c, #f77737); border: none; color: #fff; font-weight: 600;" onclick="postToInstagram('${fullUrl}', \`${(item.prompt || '').replace(/`/g, '\\`')}\`, this)">📸 Post to Instagram</button>
                 <button class="action-btn" onclick="copyCardUrl('${fullUrl}', this)">📋 Copy Link</button>
                 <a class="action-btn" href="${fullUrl}" download="kruger_${item._id}.png">⬇️ Download</a>
                 <button class="action-btn delete-btn" onclick="deleteCardItem('${item._id}', this)">🗑️</button>
@@ -593,14 +593,21 @@
           body: JSON.stringify(payload)
         });
         console.log('[Instagram Webhook] Response Status:', response.status);
-        return { success: response.ok, status: response.status };
+        return { success: true, status: response.status };
       } catch (err) {
         console.error('[Instagram Webhook] Error:', err);
         return { success: false, error: err.message };
       }
     }
 
-    window.postToInstagram = (imgUrl, promptText) => {
+    window.postToInstagram = async (imgUrl, promptText, btnEl) => {
+      let origHtml = '';
+      if (btnEl) {
+        origHtml = btnEl.innerHTML;
+        btnEl.innerHTML = '⏳ Sending Webhook...';
+        btnEl.disabled = true;
+      }
+
       const modal = document.getElementById('ig-modal');
       const previewImg = document.getElementById('ig-preview-img');
       const captionText = document.getElementById('ig-caption-text');
@@ -610,31 +617,28 @@
       const formattedCaption = `✨ ${promptText || 'AI Generated Content'}\n\nCreated with Kruger.ai 🚀\n\n#KrugerAI #AIPoster #InstagramContent #ContentCreator #GeneratedWithAI #SocialMediaPost`;
       if (captionText) captionText.value = formattedCaption;
 
+      // Send HTTP POST request to Instagram Webhook
+      await sendToInstagramWebhook(promptText, imgUrl);
+
+      if (btnEl) {
+        btnEl.innerHTML = '✅ Sent to Webhook!';
+        setTimeout(() => {
+          btnEl.innerHTML = origHtml;
+          btnEl.disabled = false;
+        }, 2500);
+      }
+
       if (modal) modal.classList.add('active');
 
-      // Trigger Webhook POST immediately upon clicking Post to Instagram
-      sendToInstagramWebhook(promptText, imgUrl);
-
       if (openBtn) {
-        openBtn.onclick = () => {
-          openBtn.textContent = '🚀 Webhook Sent! Opening...';
-          // Send to Instagram Webhook again on user action
-          sendToInstagramWebhook(promptText, imgUrl);
-          // Copy caption automatically
-          copyToClipboard(formattedCaption);
-          // Trigger image download
-          const a = document.createElement('a');
-          a.href = imgUrl;
-          a.download = 'instagram_post.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-          // Open Instagram Web
+        openBtn.textContent = '🚀 Send to Webhook Again';
+        openBtn.onclick = async () => {
+          openBtn.textContent = '⏳ Sending to Webhook...';
+          await sendToInstagramWebhook(promptText, imgUrl);
+          openBtn.textContent = '✅ Sent to Webhook!';
           setTimeout(() => {
-            window.open('https://www.instagram.com/', '_blank');
-            openBtn.textContent = '🚀 Open Instagram';
-          }, 500);
+            openBtn.textContent = '🚀 Send to Webhook Again';
+          }, 2500);
         };
       }
     };

@@ -311,19 +311,10 @@ const qs = (sel, ctx = document) => ctx.querySelector(sel);
           console.error('[Instagram Webhook POST Error]:', e);
         }
 
-        const caption = `✨ ${promptText || 'AI Generated Content'}\n\nCreated with Kruger.ai 🚀\n\n#KrugerAI #AIPoster #InstagramContent #ContentCreator #GeneratedWithAI`;
-        copyTextToClipboard(caption).then(() => {
-          const a = document.createElement('a');
-          a.href = imageUrl;
-          a.download = 'instagram_post.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => {
-            window.open('https://www.instagram.com/', '_blank');
-            igBtn.innerHTML = origText;
-          }, 500);
-        });
+        igBtn.innerHTML = '✅ Sent to Webhook!';
+        setTimeout(() => {
+          igBtn.innerHTML = origText;
+        }, 2500);
       };
     }
 
